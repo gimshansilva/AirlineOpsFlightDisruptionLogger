@@ -1,6 +1,4 @@
-<<<<<<< HEAD
 # AirlineOpsFlightDisruptionLogger
-=======
 # Sri Lankan Airlines Ltd - Flight Disruption Logger
 
 A single-page ASP.NET Core 8 MVC module for logging flight disruptions and immediately viewing the latest operational events in a table for Sri Lankan Airlines Ltd.
