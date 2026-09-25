@@ -129,5 +129,3 @@ git remote add origin https://github.com/<your-username>/<your-repository>.git
 git push -u origin main
 ```
 
-Then share the repository URL with the supervisor before the assignment deadline.
->>>>>>> 4c7f391 (Initial project commit)
