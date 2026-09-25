@@ -1,0 +1,22 @@
+## .NET / Visual Studio
+bin/
+obj/
+.vs/
+*.user
+*.suo
+
+## Rider
+.idea/
+*.DotSettings.user
+
+## Test / coverage
+TestResults/
+coverage/
+
+## OS
+.DS_Store
+Thumbs.db
+
+## Local environment
+*.local.json
+.env

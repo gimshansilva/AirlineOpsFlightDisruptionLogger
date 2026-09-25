@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Sri Lankan Airlines Ltd</title>
+    <link rel="icon" type="image/png" href="~/images/srilankan-airlines-logo.png" asp-append-version="true" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    <header class="topbar">
+        <div class="topbar-inner">
+            <a class="brand" href="/">
+                <img src="~/images/srilankan-airlines-logo.png" asp-append-version="true"
+                     alt="SriLankan Airlines" class="brand-logo"
+                     onerror="this.closest('.brand').classList.add('logo-fallback')" />
+                <span class="brand-text">
+                    <strong>SriLankan Airlines</strong>
+                    <small>Flight Operations Console</small>
+                </span>
+            </a>
+        </div>
+    </header>
+    <main class="page-shell">
+        @RenderBody()
+    </main>
+    <footer class="site-footer">
+        <div class="footer-brand">
+            <img src="~/images/it-systems-logo.png" asp-append-version="true"
+                 alt="SriLankan IT Systems" class="footer-logo"
+                 onerror="this.style.display='none'" />
+            <div class="footer-text">
+                <span>&copy; @DateTime.UtcNow.Year Sri Lankan Airlines Ltd &mdash; Internal Operations Tooling</span>
+                <span class="footer-tag">Built by IT Systems Division</span>
+            </div>
+        </div>
+    </footer>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
