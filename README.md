@@ -128,6 +128,8 @@ git branch -M main
 git remote add origin https://github.com/<your-username>/<your-repository>.git
 git push -u origin main
 ```
+## Site Preview
+<img width="1898" height="871" alt="Screenshot 2026-09-29 161217" src="https://github.com/user-attachments/assets/8cfcf223-af4d-4940-bb25-8fc96de23fd1" />
+<img width="1901" height="868" alt="Screenshot 2026-09-29 161248" src="https://github.com/user-attachments/assets/e10e2d2c-aa6a-418a-9909-ba54271cda91" />
+<img width="1902" height="655" alt="Screenshot 2026-09-29 161258" src="https://github.com/user-attachments/assets/30e17a80-ba43-4d12-979b-6f210859fa5a" />
 
-Then share the repository URL with the supervisor before the assignment deadline.
->>>>>>> 4c7f391 (Initial project commit)
