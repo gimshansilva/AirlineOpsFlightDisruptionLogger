@@ -1,0 +1,277 @@
+@model FlightDisruptionPageViewModel
+@{
+    ViewData["Title"] = "Flight Disruption Logger";
+}
+
+<div class="header">
+    <div>
+        <p class="eyebrow">SRI LANKAN AIRLINES LTD</p>
+        <h1>Flight Disruption Logger</h1>
+        <p class="subtitle">Record operational disruptions and monitor passenger-impact events across the network.</p>
+    </div>
+    <div class="header-status"><span></span> Operations console <strong>LIVE</strong></div>
+</div>
+
+@if (TempData["SuccessMessage"] is string successMessage)
+{
+    <div class="alert success" role="status">@successMessage</div>
+}
+
+<section class="card">
+    <div class="card-header">
+        <div>
+            <h2>Log a disruption</h2>
+            <p>Enter the disruption details below.</p>
+        </div>
+    </div>
+
+    <form asp-action="Index" method="post" class="form-grid" novalidate>
+        @Html.AntiForgeryToken()
+        <div asp-validation-summary="ModelOnly" class="validation-summary"></div>
+
+        <div class="field">
+            <label asp-for="Form.FlightNumber"></label>
+            <input asp-for="Form.FlightNumber" placeholder="e.g. UL302" autocomplete="off" />
+            <span asp-validation-for="Form.FlightNumber" class="validation"></span>
+        </div>
+
+        <div class="field">
+            <label asp-for="Form.DisruptionTypeId"></label>
+            <select asp-for="Form.DisruptionTypeId">
+                <option value="">Select a reason</option>
+                @foreach (var type in Model.DisruptionTypes)
+                {
+                    <option value="@type.Id">@type.Description (@type.Code)</option>
+                }
+            </select>
+            <span asp-validation-for="Form.DisruptionTypeId" class="validation"></span>
+        </div>
+
+        <div class="field">
+            <label asp-for="Form.DelayMinutes"></label>
+            <input asp-for="Form.DelayMinutes" type="number" min="1" step="1" placeholder="e.g. 45" />
+            <span asp-validation-for="Form.DelayMinutes" class="validation"></span>
+        </div>
+
+        <div class="field field-wide">
+            <label asp-for="Form.Remarks"></label>
+            <textarea asp-for="Form.Remarks" rows="4" maxlength="500" placeholder="Optional operational notes..."></textarea>
+            <span asp-validation-for="Form.Remarks" class="validation"></span>
+            <small>Maximum 500 characters.</small>
+        </div>
+
+        <div class="care-options field-wide">
+            <span class="group-label">Passenger Care</span>
+            <label class="check-card">
+                <input asp-for="Form.RequiresPassengerHotel" />
+                <span>
+                    <strong>Hotel Accommodation Required</strong>
+                    <small>Passenger requires overnight accommodation.</small>
+                </span>
+            </label>
+            <label class="check-card">
+                <input asp-for="Form.RequiresMealVoucher" />
+                <span>
+                    <strong>Meal Vouchers Issued</strong>
+                    <small>Meal vouchers have been issued to passengers.</small>
+                </span>
+            </label>
+        </div>
+
+        <div class="actions field-wide">
+            <button type="submit">Log Disruption</button>
+        </div>
+    </form>
+</section>
+
+    <section class="metrics" aria-label="Operational summary">
+        <article class="metric-card metric-primary">
+            <span class="metric-label">Events logged</span>
+            <strong>@Model.Logs.Count</strong>
+            <small>Leading cause: @Model.TopDisruptionDescription</small>
+        </article>
+        <article class="metric-card">
+            <span class="metric-label">Delay exposure</span>
+            <strong>@Model.TotalDelayMinutes.ToString("N0") <em>min</em></strong>
+            <small>@Model.AverageDelayMinutes.ToString("0.0") min average per event</small>
+        </article>
+        <article class="metric-card">
+            <span class="metric-label">Passenger care</span>
+            <strong>@Model.PassengerCareCount</strong>
+            <small>Events requiring hotel or meals</small>
+        </article>
+        <article class="metric-card metric-alert">
+            <span class="metric-label">High impact</span>
+            <strong>@Model.HighImpactCount</strong>
+            <small>180+ minutes or dual care action</small>
+        </article>
+    </section>
+
+    @if (Model.Breakdown.Count > 0)
+    {
+        <section class="card breakdown-card">
+            <div class="card-header">
+                <div>
+                    <h2>Disruptions by reason</h2>
+                    <p>Share of logged events per disruption category.</p>
+                </div>
+            </div>
+            <div class="breakdown-list">
+                @foreach (var item in Model.Breakdown)
+                {
+                    <div class="breakdown-row">
+                        <span class="breakdown-label">@item.Description <em>(@item.Code)</em></span>
+                        <div class="breakdown-bar-track">
+                            <div class="breakdown-bar-fill" style="width:@(item.Percentage)%"></div>
+                        </div>
+                        <span class="breakdown-count">@item.Count</span>
+                    </div>
+                }
+            </div>
+        </section>
+    }
+
+<section class="card">
+        <div class="card-header table-heading">
+        <div>
+            <h2>Logged Disruptions</h2>
+            <p>@Model.Logs.Count event(s), most recent first.</p>
+        </div>
+            <div class="table-tools">
+                <label class="sr-only" for="logSearch">Search disruptions</label>
+                <input id="logSearch" type="search" placeholder="Search flight or notes" autocomplete="off" />
+                <select id="reasonFilter" aria-label="Filter by disruption reason">
+                    <option value="">All reasons</option>
+                    @foreach (var type in Model.DisruptionTypes)
+                    {
+                        <option value="@type.Code">@type.Code</option>
+                    }
+                </select>
+                <button type="button" id="exportCsv" class="btn-outline">Export CSV</button>
+            </div>
+    </div>
+
+    @if (Model.Logs.Count == 0)
+    {
+        <div class="empty-state">No disruptions have been logged yet.</div>
+    }
+    else
+    {
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Flight</th>
+                        <th>Disruption</th>
+                        <th>Delay</th>
+                        <th>Hotel</th>
+                        <th>Meal Voucher</th>
+                        <th>Remarks</th>
+                        <th>Logged (UTC)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var log in Model.Logs)
+                {
+                    <tr data-flight="@log.FlightNumber" data-code="@log.DisruptionType.Code" data-search="@log.Remarks"
+                        data-reason="@log.DisruptionType.Description" data-delay="@log.DelayMinutes"
+                        data-hotel="@(log.RequiresPassengerHotel ? "Yes" : "No")" data-meal="@(log.RequiresMealVoucher ? "Yes" : "No")"
+                        data-logged="@log.LoggedAtUtc.ToString("yyyy-MM-dd HH:mm:ss")">
+                        <td><strong>@log.FlightNumber</strong></td>
+                        <td>
+                            <span class="type-badge">@log.DisruptionType.Description</span>
+                            <span class="code">@log.DisruptionType.Code</span>
+                        </td>
+                        <td>@log.DelayMinutes min</td>
+                        <td>
+                            @if (log.RequiresPassengerHotel)
+                            {
+                                <span class="status-badge yes">Yes</span>
+                            }
+                            else
+                            {
+                                <span class="status-badge no">No</span>
+                            }
+                        </td>
+                        <td>
+                            @if (log.RequiresMealVoucher)
+                            {
+                                <span class="status-badge yes">Yes</span>
+                            }
+                            else
+                            {
+                                <span class="status-badge no">No</span>
+                            }
+                        </td>
+                        <td class="remarks">@(string.IsNullOrWhiteSpace(log.Remarks) ? "—" : log.Remarks)</td>
+                        <td class="timestamp">@log.LoggedAtUtc.ToString("yyyy-MM-dd HH:mm:ss")</td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+        <div id="noMatches" class="empty-state hidden">No disruptions match the current filters.</div>
+    }
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        const searchInput = document.getElementById('logSearch');
+        const reasonFilter = document.getElementById('reasonFilter');
+        const noMatches = document.getElementById('noMatches');
+        const rows = [...document.querySelectorAll('tbody tr')];
+
+        function filterLogs() {
+            const search = (searchInput?.value || '').toLowerCase().trim();
+            const reason = reasonFilter?.value || '';
+            let visible = 0;
+
+            rows.forEach(row => {
+                const matchesSearch = `${row.dataset.flight} ${row.dataset.code} ${row.dataset.search || ''}`.toLowerCase().includes(search);
+                const matchesReason = !reason || row.dataset.code === reason;
+                const isVisible = matchesSearch && matchesReason;
+                row.hidden = !isVisible;
+                visible += isVisible ? 1 : 0;
+            });
+
+            noMatches?.classList.toggle('hidden', visible > 0);
+        }
+
+        searchInput?.addEventListener('input', filterLogs);
+        reasonFilter?.addEventListener('change', filterLogs);
+
+        document.getElementById('exportCsv')?.addEventListener('click', () => {
+            const visibleRows = rows.filter(row => !row.hidden);
+            if (visibleRows.length === 0) {
+                return;
+            }
+            const header = ['Flight', 'Reason', 'Code', 'Delay (min)', 'Hotel', 'Meal Voucher', 'Remarks', 'Logged (UTC)'];
+            const escapeCsv = value => `"${(value ?? '').toString().replace(/"/g, '""')}"`;
+            const lines = [header.map(escapeCsv).join(',')];
+
+            visibleRows.forEach(row => {
+                lines.push([
+                    row.dataset.flight,
+                    row.dataset.reason,
+                    row.dataset.code,
+                    row.dataset.delay,
+                    row.dataset.hotel,
+                    row.dataset.meal,
+                    row.dataset.search,
+                    row.dataset.logged
+                ].map(escapeCsv).join(','));
+            });
+
+            const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `disruption-log-${new Date().toISOString().slice(0, 10)}.csv`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        });
+    </script>
+}
