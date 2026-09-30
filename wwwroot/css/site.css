@@ -63,7 +63,7 @@ body {
   object-fit: contain;
   display: block;
   background: #fff;
-  border-radius: 10px;
+  border-radius: 100px;
   padding: 0px 0px;
 }
 .brand.logo-fallback .brand-logo {
@@ -76,7 +76,7 @@ body {
 }
 .brand-text strong {
   font-size: 40px;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.06em;
 }
 .brand-text small {
   color: rgba(255, 255, 255, 0.78);
@@ -102,13 +102,13 @@ body {
   gap: 15px;
 }
 .footer-logo {
-  height: 80px;
-  width: 80px;
+  height: 50px;
+  width: 50px;
   object-fit: contain;
   display: block;
   background: #fff;
   border: 0px solid #fff;
-  border-radius: 100px;
+  border-radius: 50px;
   padding: 0px;
 }
 .footer-text {
